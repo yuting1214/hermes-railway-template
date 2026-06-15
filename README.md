@@ -30,7 +30,7 @@ hermes-agent/
 │   ├── slim/     Dockerfile + railway.json   — python-slim, CLI+gateway, vol /data
 │   └── full/     Dockerfile + railway.json   — dashboard built from source, vol /opt/data
 ├── scripts/      (run from the linked project dir, e.g. variants/slim)
-│   ├── onboard-codex.sh    open a shell to run the Codex device-flow login
+│   ├── onboard-codex.sh    drive Codex device-flow auth (hermes auth add) + set model
 │   ├── backup-pull.sh      export a profile + pull it down (+ git/R2 sink)
 │   └── restore-profile.sh  fetch a profile tarball by URL + import it
 └── docs/
@@ -46,8 +46,8 @@ railway volume add -m /data          # attaches to the linked service (no -s fla
 railway up -s hermes -d
 
 # auth (Codex / ChatGPT subscription) — device flow, no port-forward needed:
-SERVICE=hermes ../../scripts/onboard-codex.sh    # opens a shell; run the login,
-                                                 # open the URL, enter the code
+SERVICE=hermes ../../scripts/onboard-codex.sh    # device flow: open the printed
+                                                 # URL, enter the code, approve
 
 # use it
 railway ssh -s hermes -- hermes -z 'reply: CODEX_OK'

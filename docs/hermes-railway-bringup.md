@@ -85,29 +85,32 @@ railway ssh -s hermes -- hermes --version
 
 ## Phase 3 — Codex (ChatGPT subscription) auth
 
-Hermes Codex login is a **device-authorization flow**
-(`hermes login --provider openai-codex --no-browser` → prints a URL + code), so
-it completes cleanly over `railway ssh` with **no port-forwarding** — no token
-copying needed.
+Codex auth is a **device-authorization flow**: it prints a URL + a short code, you
+authorize in any browser, and the CLI polls to completion — **no port-forwarding,
+no token copying**, so it works cleanly over `railway ssh`.
+
+> **Command note (verified):** these images build from upstream `@main`, where the
+> old `hermes login` was **removed**. Use **`hermes auth add`** instead. The CLI
+> prints: *"Open https://auth.openai.com/codex/device and enter code XXXX-XXXX"*.
+
+Run it (works the same on `hermes` slim or `hermes-full`; substitute the service):
 
 ```bash
 cd hermes-agent/variants/slim                 # the linked project dir
-SERVICE=hermes ../../scripts/onboard-codex.sh # opens an interactive shell
+railway ssh -s hermes -- hermes auth add openai-codex --type oauth --no-browser
+#   → open the printed URL on your Mac, enter the code, sign in with ChatGPT.
+#     The command polls and finishes on its own ("Added openai-codex OAuth credential").
 
-# in that shell:
-hermes login --provider openai-codex --no-browser
-#   → open the printed URL on your Mac, sign in with ChatGPT, enter the code
-hermes model                                  # pick the openai-codex entry
-hermes -z 'reply: CODEX_OK'                   # → CODEX_OK
-exit
+# set the model + verify (single-token prompt; railway ssh splits spaces):
+railway ssh -s hermes -- hermes config set model openai-codex/gpt-5.4
+railway ssh -s hermes -- hermes auth status openai-codex     # → "logged in"
+railway ssh -s hermes -- hermes -z ping                      # → pong
 ```
 
-Tokens land in `$HERMES_HOME/auth.json` on the volume, so they persist across
-redeploys.
-
-> The model is set via the interactive `hermes model` picker (provider
-> `openai-codex`), or `hermes config set model '<provider/model>'` once you know
-> the id. `hermes -m <model> -z "…"` can override per-call.
+`auth.json` lands in `$HERMES_HOME/auth.json` on the volume, so it persists across
+redeploys. (`scripts/onboard-codex.sh` opens an interactive shell if you prefer to
+run the steps by hand. `hermes model` is the interactive provider/model picker;
+`hermes -m <model> -z …` overrides per-call.)
 
 ## Phase 4 — Terminal interaction
 
