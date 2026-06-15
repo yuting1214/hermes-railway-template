@@ -1,0 +1,4 @@
+# Build context is this directory only; keep the upload tiny.
+*.md
+.git
+.DS_Store

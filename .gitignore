@@ -1,0 +1,17 @@
+# Secrets — never commit
+.env
+*.env
+auth.json
+.auth.json
+
+# Profile backups / transfer artifacts (may contain agent state)
+*.tar.gz
+*.tgz
+*.b64
+backups/
+
+# OS / editor cruft
+.DS_Store
+*.swp
+.idea/
+.vscode/
