@@ -12,7 +12,9 @@ The marketplace template (`praveen-ks-2001/hermes-agent-template`) works but
 bundles a non-Hermes UI and extra deps. This template:
 
 - ships **two clean variants** — `slim` (CLI + gateway, smallest RAM) and `full`
-  (official image + the **first-party** `hermes dashboard` UI);
+  (the **first-party** `hermes dashboard` UI, **built from source** — the official
+  `ghcr.io/nousresearch/hermes-agent` image is a private GHCR package, so we build
+  the dashboard ourselves);
 - is built around **`railway ssh` + tmux** for terminal onboarding and `hermes chat`;
 - runs an **always-on response engine** (`hermes gateway run`) so Telegram/Discord
   keep getting answered 24/7;
@@ -26,7 +28,7 @@ bundles a non-Hermes UI and extra deps. This template:
 hermes-agent/
 ├── variants/
 │   ├── slim/     Dockerfile + railway.json   — python-slim, CLI+gateway, vol /data
-│   └── full/     Dockerfile + railway.json   — official image + dashboard, vol /opt/data
+│   └── full/     Dockerfile + railway.json   — dashboard built from source, vol /opt/data
 ├── scripts/      (run from the linked project dir, e.g. variants/slim)
 │   ├── onboard-codex.sh    open a shell to run the Codex device-flow login
 │   ├── backup-pull.sh      export a profile + pull it down (+ git/R2 sink)
@@ -55,7 +57,7 @@ railway ssh -s hermes                 # then: tmux attach -t hermes ; hermes cha
 Add an always-on Telegram bot:
 
 ```bash
-railway variables --set 'TELEGRAM_BOT_TOKEN=...' -s hermes
+railway variable set 'TELEGRAM_BOT_TOKEN=...' -s hermes
 railway redeploy -s hermes -y
 ```
 
@@ -79,11 +81,12 @@ practices) — see the operator deep-dive:
 
 | | slim | full |
 |---|---|---|
-| Base | `python:3.12-slim` + pip `git@main` | `ghcr.io/nousresearch/hermes:latest` |
+| Base | `python:3.12-slim` + pip `git@main` | from source: `node:22` builds UI → `python:3.12-slim` runs it |
 | `HERMES_HOME` / volume | `/data` | `/opt/data` |
 | UI | none (CLI/`hermes chat`) | first-party `hermes dashboard` on `$PORT` |
 | RAM | smallest (~200-400 MB) | heavier (Node + Playwright) |
-| Keep-alive | `hermes gateway run` (entrypoint) | s6-supervised gateway + dashboard |
+| Keep-alive | `hermes gateway run` (entrypoint) | entrypoint runs `hermes dashboard` + gateway |
+| Dashboard auth | n/a | basic-auth env vars or `hermes dashboard register` (required on public bind) |
 
 > CLI flags verified against hermes-agent v0.16.0 (`-z/--oneshot`,
 > `gateway run`, `login --provider openai-codex --no-browser`,

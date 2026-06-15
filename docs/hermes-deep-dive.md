@@ -88,12 +88,23 @@ request"; Hermes retries 5× then declares `telegram_polling_conflict`).
 persona. Pros: total isolation, independent uptime. Cons: ~one extra base
 footprint per container.
 
-**B) One container, multiple profiles (resource-efficient).** Use the **full/s6
-image** — `hermes_cli/container_boot.py:reconcile_profile_gateways` walks
+**B) One container, multiple profiles (resource-efficient).** This relies on the
+**s6 per-profile supervision** that ships in the *official* image —
+`hermes_cli/container_boot.py:reconcile_profile_gateways` walks
 `$HERMES_HOME/profiles/*/` (each marked by its `SOUL.md`), registers an s6 slot
 `gateway-<profile>`, and **auto-starts those whose last state was `running`** — so
 once started, each persona's gateway survives redeploys. Each profile reads its own
 `.env` (own token), `SOUL.md`, model, memory. Setup:
+
+> ⚠️ **Caveat (verified):** the official image `ghcr.io/nousresearch/hermes-agent`
+> is a **private GHCR package** — Railway (and you) can't pull it, so the
+> s6-driven path isn't available out of the box. Our `full` variant is **built
+> from source** and runs a single `hermes dashboard` + one `gateway run` (no s6
+> per-profile reconciler). For true one-container multi-persona you'd either need
+> GHCR access to the official image, or extend the `full` Dockerfile to launch one
+> `hermes -p <name> gateway run` per profile under a small supervisor. Until then,
+> **option A (one service per persona)** is the reliable multi-persona path.
+
 ```bash
 hermes profile create oracle && hermes profile create coach   # edit each SOUL.md
 hermes -p oracle config set telegram.allow_from <userX>       # own token in oracle/.env

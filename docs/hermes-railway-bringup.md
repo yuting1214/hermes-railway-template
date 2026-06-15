@@ -117,17 +117,20 @@ railway ssh -s hermes
 #   $ tmux attach -t hermes
 #   $ hermes chat
 
-# or one-shot from your Mac:
-railway ssh -s hermes -- hermes -z "summarize today's logs"
+# one-shot from your Mac — single-token prompt (railway ssh splits spaces):
+railway ssh -s hermes -- hermes -z ping
+# for multi-word prompts use the interactive shell instead:
+#   railway ssh -s hermes   →   hermes -z "summarize today's logs"
 ```
 
 tmux keeps your session alive across disconnects; it is independent of the
-gateway, so attaching/detaching never interrupts the responder.
+gateway, so attaching/detaching never interrupts the responder. (`railway ssh -s
+hermes --session` also opens a native tmux session and auto-installs tmux.)
 
 ## Phase 5 — Always-on Telegram (the response engine)
 
 ```bash
-railway variables --set 'TELEGRAM_BOT_TOKEN=123456:ABC...' -s hermes
+railway variable set 'TELEGRAM_BOT_TOKEN=123456:ABC...' -s hermes
 railway redeploy -s hermes -y
 railway logs -s hermes -d        # expect the Telegram adapter to connect
 ```
@@ -181,7 +184,7 @@ SERVICE=hermes NAME=default ARCHIVE_URL="https://…/default-XXXX.tar.gz" \
   ../../scripts/restore-profile.sh
 
 # re-add secrets (NOT in the export):
-railway variables --set 'TELEGRAM_BOT_TOKEN=...' -s hermes
+railway variable set 'TELEGRAM_BOT_TOKEN=...' -s hermes
 ../../scripts/onboard-codex.sh   # re-establish Codex auth (device flow)
 ```
 
@@ -190,14 +193,38 @@ agent, and it should recall its memories.
 
 ## Phase 8 (full variant only) — the Hermes dashboard
 
+The `full` variant is **built from source** (Node 22 builds the `web/` UI → a
+Python image serves `hermes dashboard` + gateway). Why: the official
+`ghcr.io/nousresearch/hermes-agent` image is a **private** GHCR package (Railway
+can't pull it) and the built UI isn't in the git package. Deploy it like the slim
+one but with the volume at **`/opt/data`**:
+
 ```bash
-railway domain -s hermes                 # public URL
-railway open
+cd hermes-agent/variants/full
+railway init --name "hermes" && railway add --service hermes-full   # or add to an existing project
+railway volume add -m /opt/data
+railway up -s hermes-full -d
 ```
 
-The entrypoint binds the first-party `hermes dashboard` to `0.0.0.0:$PORT`. It is
-OAuth-protected by default; only set `HERMES_DASHBOARD_INSECURE=1` if you front it
-with your own access control. The dashboard reads the same `/opt/data` profile.
+**The dashboard auth gate is mandatory on a public bind.** Binding to `0.0.0.0`
+without an auth provider makes `hermes dashboard` refuse to start. Pick one (set as
+Railway variables — the entrypoint also waives the root-gateway guard via
+`HERMES_ALLOW_ROOT_GATEWAY=1`):
+
+```bash
+# A) simplest — username/password gate (no OAuth IDP):
+railway variable set 'HERMES_DASHBOARD_BASIC_AUTH_USERNAME=admin'        -s hermes-full
+railway variable set 'HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=<strong-pw>'  -s hermes-full
+railway variable set 'HERMES_DASHBOARD_BASIC_AUTH_SECRET=<32+ random>'   -s hermes-full  # stable sessions across restarts
+railway redeploy -s hermes-full -y
+railway domain -s hermes-full            # public URL → redirects to /login
+
+# B) Nous Portal OAuth instead:  railway ssh -s hermes-full -- hermes dashboard register
+```
+
+Do **not** use `--insecure` / `HERMES_DASHBOARD_INSECURE=1` on a public domain — it
+serves an unauthenticated dashboard (full config + session access). The dashboard
+reads the same `/opt/data` profile as the gateway.
 
 ---
 
@@ -207,12 +234,12 @@ with your own access control. The dashboard reads the same `/opt/data` profile.
 |------|---------|
 | Tail logs | `railway logs -s hermes -d` |
 | Shell | `railway ssh -s hermes` → `tmux attach -t hermes` |
-| One-shot | `railway ssh -s hermes -- hermes -z "…"` |
+| One-shot | `railway ssh -s hermes -- hermes -z ping` (multi-word → interactive shell) |
 | Gateway status | `railway ssh -s hermes -- hermes gateway status` |
 | List profiles | `railway ssh -s hermes -- hermes profile list` |
 | New profile | `railway ssh -s hermes -- hermes profile create <name>` |
 | Set model | `railway ssh -s hermes -- hermes config set model '<provider/model>'` |
-| Set secret | `railway variables --set 'KEY=val' -s hermes` |
+| Set secret | `railway variable set 'KEY=val' -s hermes` (legacy: `variables --set`) |
 | Redeploy | `railway redeploy -s hermes -y` |
 | Backup | `SERVICE=hermes ../../scripts/backup-pull.sh` |
 | Restore | `ARCHIVE_URL=… ../../scripts/restore-profile.sh` |
