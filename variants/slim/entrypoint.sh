@@ -31,10 +31,14 @@ tmux new-session -d -s hermes 2>/dev/null || true
 # Keep-alive == the always-on response engine.
 #   HERMES_KEEPALIVE=gateway  → always run the messaging gateway
 #   HERMES_KEEPALIVE=idle     → just stay up for railway ssh (manual hermes chat)
-#   HERMES_KEEPALIVE=auto     → gateway iff a platform token is present (default)
+#   HERMES_KEEPALIVE=auto     → gateway iff a messaging platform is CONFIGURED
+#       (default). A token counts whether it's a Railway env var OR was written to
+#       $HERMES_HOME/.env by `hermes gateway setup` — so a configured agent always
+#       auto-starts its SUPERVISED (PID-1) gateway, surviving redeploys/crashes.
 mode="${HERMES_KEEPALIVE:-auto}"
 if [ "$mode" = "auto" ]; then
-  if [ -n "${TELEGRAM_BOT_TOKEN:-}${DISCORD_BOT_TOKEN:-}${SLACK_BOT_TOKEN:-}" ]; then
+  if [ -n "${TELEGRAM_BOT_TOKEN:-}${DISCORD_BOT_TOKEN:-}${SLACK_BOT_TOKEN:-}" ] \
+     || { [ -f "$ENV_FILE" ] && grep -qE '^(TELEGRAM_BOT_TOKEN|DISCORD_BOT_TOKEN|SLACK_BOT_TOKEN)=.' "$ENV_FILE"; }; then
     mode="gateway"
   else
     mode="idle"
