@@ -231,6 +231,66 @@ reads the same `/opt/data` profile as the gateway.
 
 ---
 
+## Memory & cost control
+
+Railway bills **RAM·time + CPU·time + storage**, and the always-on gateway is the
+cost. The thing that bites: a heavy agent run runs **in-process** (Hermes uses
+threads, not subprocesses), so it balloons the gateway process — and Python/glibc
+**don't return that heap to the OS** when the job finishes, so RSS stays high and
+you keep paying for it. (Hermes' `memory_monitor.py` *logs* RSS but does **not**
+auto-reclaim — no `malloc_trim`/`gc`.) Observed: a container peak near **2 GB**
+during heavy/concurrent runs, dominated by **anonymous heap** (not page cache).
+
+### Fix #1 — cap the glibc allocator (set once, biggest win)
+glibc spawns up to **8×CPU memory arenas** for multi-threaded programs; each hoards
+freed heap, so several concurrent agent runs multiply RSS. Cap it:
+```bash
+railway variable set 'MALLOC_ARENA_MAX=2' -s hermes      # triggers a redeploy → applies it
+# optional: return freed memory to the OS sooner
+railway variable set 'MALLOC_TRIM_THRESHOLD_=100000' -s hermes
+```
+This targets exactly the right component (anon heap). Verified live: a fresh
+container sits ~120–190 MB; the cap limits how high heavy runs balloon and how much
+stays retained afterward. **Durable form:** bake `ENV MALLOC_ARENA_MAX=2` into the
+variant Dockerfile so every build/redeploy starts with it.
+
+> Caveat: it's read by glibc **only at process start**, so it can't shrink the
+> *currently running* process — applying it requires a restart (which Railway does
+> automatically on a variable change). That restart is safe (see Fix #2) and also
+> resets the current bloat to baseline.
+
+### Fix #2 — graceful restart to reclaim (safe, repeatable)
+Restarting is the reliable way to drop RSS back to baseline, and it's **safe**:
+Hermes drains in-flight work (`agent.restart_drain_timeout`, default 180 s) and
+**resumes the conversation** from `state.db` (`resume_pending`); the `/data` volume
+(auth, config, cron, sessions) persists.
+```bash
+railway restart -s hermes -y     # no rebuild; ~30 s; conversation resumes
+```
+Do it after heavy batches or on a schedule. Avoid doing it **mid heavy job** (it
+interrupts/re-runs that turn). For automation/other agents, use a project-scoped
+`RAILWAY_TOKEN` to run `restart`/`down`/`up` headlessly.
+
+### Measuring what Railway actually meters
+The dashboard graph is the **whole-container cgroup total** (all processes + page
+cache, at peak) — a *different, larger* number than any single process's RSS.
+```bash
+railway ssh -s hermes -- cat /sys/fs/cgroup/memory.peak    # bytes; ÷1048576 = MB. Resets per container.
+railway ssh -s hermes -- cat /sys/fs/cgroup/memory.stat    # 'anon' = heap (arena cap helps), 'file' = reclaimable cache
+```
+After the next heavy job, compare `memory.peak` against the old ~2 GB to confirm
+the win. Enable continuous logging with `hermes config set logging.memory_monitor
+true` (logs RSS every 5 min).
+
+### What NOT to do
+- **Serverless / app-sleep** — won't help: Railway only sleeps a service after
+  ~10 min with **no outbound packets**, but the gateway constantly polls Telegram,
+  so it never sleeps.
+- **Hard RAM limit** — exceeding it OOM-kills the container **mid-task**
+  (ungraceful). Prefer the arena cap + scheduled graceful restart.
+- To fully stop compute when idle: `railway down -s hermes -y` ($0 compute, bot
+  offline) → `railway up -s hermes -d` to bring it back (volume persists).
+
 ## Operations cheat-sheet
 
 | Task | Command |
@@ -244,6 +304,8 @@ reads the same `/opt/data` profile as the gateway.
 | Set model | `railway ssh -s hermes -- hermes config set model '<provider/model>'` |
 | Set secret | `railway variable set 'KEY=val' -s hermes` (legacy: `variables --set`) |
 | Redeploy | `railway redeploy -s hermes -y` |
+| Restart (reclaim RAM) | `railway restart -s hermes -y` (drains + resumes) |
+| Memory peak | `railway ssh -s hermes -- cat /sys/fs/cgroup/memory.peak` (÷1048576 = MB) |
 | Backup | `SERVICE=hermes ../../scripts/backup-pull.sh` |
 | Restore | `ARCHIVE_URL=… ../../scripts/restore-profile.sh` |
 | Codex auth | `../../scripts/onboard-codex.sh` (device flow) |
