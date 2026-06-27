@@ -18,6 +18,7 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     HERMES_HOME=/data \
     HOME=/data \
+    MALLOC_ARENA_MAX=2 \
     PATH="/opt/venv/bin:$PATH"
 
 # Runtime deps only: ripgrep (Hermes file-search tool), git, tmux (session

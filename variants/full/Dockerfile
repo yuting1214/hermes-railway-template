@@ -37,6 +37,7 @@ ENV PYTHONUNBUFFERED=1 \
     HERMES_HOME=/opt/data \
     HOME=/opt/data \
     HERMES_WEB_DIST=/opt/hermes/hermes_cli/web_dist \
+    MALLOC_ARENA_MAX=2 \
     PATH="/opt/venv/bin:$PATH"
 
 RUN apt-get update \
