@@ -1,4 +1,4 @@
-# Hermes Agent — Slim (headless, lowest RAM)
+# Hermes Agent (Slim) — Cheapest Self-Improving AI Agent on Railway
 
 Deploy and host a **self-improving [Hermes](https://github.com/nousresearch/hermes-agent)
 agent by Nous Research** — an autonomous agent that connects to your messaging

@@ -1,4 +1,4 @@
-# Hermes Agent — Full (official dashboard)
+# Hermes Agent (Full) — Self-Improving AI Agent with Official Dashboard
 
 Deploy and host a **self-improving [Hermes](https://github.com/nousresearch/hermes-agent)
 agent by Nous Research** — an autonomous agent that connects to your messaging
