@@ -21,8 +21,8 @@ bill** — for the same 24/7 self-improving agent. Slim ships no dashboard, no N
 and no headless browser, and tunes glibc (`MALLOC_ARENA_MAX=2`) so the always-on
 gateway idles around **~112 MB**.
 
-> Want a point-and-click web dashboard instead? Deploy the **Full** variant — the
-> first-party Nous dashboard, built from source. (link added at publish)
+> Want a point-and-click web dashboard instead? A **Full** variant — the first-party
+> Nous dashboard, built from source — is also available on this marketplace.
 
 ## What you get
 
