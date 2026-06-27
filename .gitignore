@@ -10,6 +10,9 @@ auth.json
 *.b64
 backups/
 
+# Confidential — internal competitive research, do not publish
+docs/competitive-analysis.md
+
 # OS / editor cruft
 .DS_Store
 *.swp
