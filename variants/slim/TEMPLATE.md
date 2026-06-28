@@ -6,6 +6,8 @@ interaction, creates its own skills, and gets more capable over time. This **Sli
 template runs it **headless** — CLI plus an always-on messaging gateway, no web UI —
 for the smallest possible footprint (**~112 MB RAM**).
 
+![Hermes Agent — CLI splash showing 31 tools and 76 skills](https://raw.githubusercontent.com/yuting1214/hermes-railway-template/7b6ac00/assets/onboarding.png)
+
 ## About Hosting Hermes Agent (Slim)
 
 The Slim variant keeps an always-on `hermes gateway` answering Telegram, Discord, and
