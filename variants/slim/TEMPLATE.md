@@ -53,5 +53,6 @@ bring a channel online.
 - [Hermes Agent](https://github.com/nousresearch/hermes-agent) — open source by Nous
   Research; built from upstream source.
 
-> Prefer a point-and-click web dashboard? A **Full** variant — the first-party Nous
-> dashboard, built from source — is also available on this marketplace.
+> Prefer a point-and-click web dashboard? Deploy the
+> **[Full variant](https://railway.com/deploy/hermes-agent-full-self-improving-ai-agen)**
+> — the first-party Nous dashboard, built from source — also on this marketplace.
