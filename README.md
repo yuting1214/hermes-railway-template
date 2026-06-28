@@ -9,7 +9,7 @@ third-party UI.
 
 |  | **Slim** — lowest RAM | **Full** — official dashboard |
 |---|---|---|
-|  | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/hermes-agent-slim-cheapest-self-improvin) | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/hermes-agent-full-self-improving-ai-agen) |
+|  | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/hermes-agent-slim-cheapest-self-improvin?referralCode=jk_FgY&utm_medium=integration&utm_source=template&utm_campaign=generic) | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/hermes-agent-full-self-improving-ai-agen?referralCode=jk_FgY&utm_medium=integration&utm_source=template&utm_campaign=generic) |
 | Steady RAM | **~112 MB** | ~300 MB |
 | Interface | CLI + always-on gateway | + first-party `hermes dashboard` (browser) |
 | Deploy form | **nothing to fill** — one-click | username + password (signing secret auto-generated) |
