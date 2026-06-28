@@ -38,10 +38,15 @@ echo "[hermes-full] dashboard on 0.0.0.0:${PORT} + gateway — HERMES_HOME=${HER
 # the volume, so it is never a field the deployer has to fill from empty. (You
 # provide USERNAME + PASSWORD as Railway variables.) Set it yourself to override.
 if [ -z "${HERMES_DASHBOARD_BASIC_AUTH_SECRET:-}" ]; then
-  s="$(grep '^HERMES_DASHBOARD_BASIC_AUTH_SECRET=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
-  [ -z "$s" ] && { s="$(python -c 'import secrets;print(secrets.token_urlsafe(48))')"; \
-    echo "[hermes-full] generated a dashboard session secret (persisted to the volume)"; }
-  export HERMES_DASHBOARD_BASIC_AUTH_SECRET="$s"; put_env HERMES_DASHBOARD_BASIC_AUTH_SECRET "$s"
+  # `|| true`: grep returns non-zero on first boot (no match yet) which would
+  # otherwise trip `set -euo pipefail` and crash-loop the container.
+  s="$(grep '^HERMES_DASHBOARD_BASIC_AUTH_SECRET=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2- || true)"
+  if [ -z "$s" ]; then
+    s="$(python -c 'import secrets;print(secrets.token_urlsafe(48))')"
+    echo "[hermes-full] generated a dashboard session secret (persisted to the volume)"
+  fi
+  export HERMES_DASHBOARD_BASIC_AUTH_SECRET="$s"
+  put_env HERMES_DASHBOARD_BASIC_AUTH_SECRET "$s"
 fi
 
 # First-party dashboard (UI assets prebuilt → --skip-build). On a public bind the
