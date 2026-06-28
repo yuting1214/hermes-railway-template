@@ -34,14 +34,20 @@ done
 PORT="${PORT:-8080}"
 echo "[hermes-full] dashboard on 0.0.0.0:${PORT} + gateway — HERMES_HOME=${HERMES_HOME}"
 
-# First-party dashboard (UI assets prebuilt → --skip-build). On a non-loopback
-# bind the auth gate engages and REQUIRES an auth provider, or it refuses to
-# start. Pick ONE (set as Railway variables):
-#   • basic password (simplest):  HERMES_DASHBOARD_BASIC_AUTH_USERNAME,
-#       HERMES_DASHBOARD_BASIC_AUTH_PASSWORD, HERMES_DASHBOARD_BASIC_AUTH_SECRET
-#   • Nous Portal OAuth:          run `hermes dashboard register` (sets
-#       HERMES_DASHBOARD_OAUTH_CLIENT_ID)
-# Do NOT use --insecure on a public Railway domain (unauthenticated dashboard).
+# Dashboard session-signing secret: auto-generated on first boot and persisted to
+# the volume, so it is never a field the deployer has to fill from empty. (You
+# provide USERNAME + PASSWORD as Railway variables.) Set it yourself to override.
+if [ -z "${HERMES_DASHBOARD_BASIC_AUTH_SECRET:-}" ]; then
+  s="$(grep '^HERMES_DASHBOARD_BASIC_AUTH_SECRET=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2-)"
+  [ -z "$s" ] && { s="$(python -c 'import secrets;print(secrets.token_urlsafe(48))')"; \
+    echo "[hermes-full] generated a dashboard session secret (persisted to the volume)"; }
+  export HERMES_DASHBOARD_BASIC_AUTH_SECRET="$s"; put_env HERMES_DASHBOARD_BASIC_AUTH_SECRET "$s"
+fi
+
+# First-party dashboard (UI assets prebuilt → --skip-build). On a public bind the
+# auth gate REQUIRES basic-auth: you set HERMES_DASHBOARD_BASIC_AUTH_USERNAME +
+# _PASSWORD (Railway variables); _SECRET is handled above. (Alternative: Nous
+# Portal OAuth via `hermes dashboard register`.) Never use --insecure on a public domain.
 hermes dashboard --host 0.0.0.0 --port "${PORT}" --no-open --skip-build &
 DASH=$!
 # Always-on response engine.
