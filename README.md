@@ -1,94 +1,79 @@
-# hermes-agent — self-owned Railway template
+<img src="assets/icon.png" alt="Hermes / Nous Girl" width="92" align="right" />
 
-Deploy and cultivate a [Hermes](https://github.com/nousresearch/hermes-agent)
-agent on Railway, driven from your Mac terminal over `railway ssh` + tmux. Only
-Hermes-team artifacts — no third-party UI. Your agent **profile** (prompt,
-skills, harness/loop config, memories, cron) is treated as a portable identity
-you can back up and recover on any device.
+# Hermes Agent — self-hosted Railway templates
 
-## Why this exists
+One-click [Hermes](https://github.com/nousresearch/hermes-agent) — the self-improving
+AI agent by **Nous Research** — on Railway, in **two lean variants**. Railway bills by
+RAM, so these are built to use as little as possible. Only Hermes-team artifacts; no
+third-party UI.
 
-The marketplace template (`praveen-ks-2001/hermes-agent-template`) works but
-bundles a non-Hermes UI and extra deps. This template:
+|  | **Slim** — lowest RAM | **Full** — official dashboard |
+|---|---|---|
+|  | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/hermes-agent-slim-cheapest-self-improvin) | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/hermes-agent-full-self-improving-ai-agen) |
+| Steady RAM | **~112 MB** | ~300 MB |
+| Interface | CLI + always-on gateway | + first-party `hermes dashboard` (browser) |
+| Deploy form | **nothing to fill** — one-click | username + password (signing secret auto-generated) |
+| `HERMES_HOME` / volume | `/data` | `/opt/data` |
 
-- ships **two clean variants** — `slim` (CLI + gateway, smallest RAM) and `full`
-  (the **first-party** `hermes dashboard` UI, **built from source** — the official
-  `ghcr.io/nousresearch/hermes-agent` image is a private GHCR package, so we build
-  the dashboard ourselves);
-- is built around **`railway ssh` + tmux** for terminal onboarding and `hermes chat`;
-- runs an **always-on response engine** (`hermes gateway run`) so Telegram/Discord
-  keep getting answered 24/7;
-- builds from **latest upstream** (`git@main`, pinnable);
-- makes the **profile** portable via `hermes profile export/import` + a Railway
-  volume + off-box backup (git / R2 / ssh-stream).
+## Why this template
+
+- **Lowest RAM, lowest bill** — slim idles **~112 MB** (no dashboard, no Node, no
+  headless browser; glibc tuned via `MALLOC_ARENA_MAX=2`). Full ships the **official**
+  Nous dashboard, **built from source**, still ~300 MB with **no Chromium**.
+- **Self-improving** — agent-curated memory, autonomous skill creation, cron jobs.
+- **24/7 messaging** — Telegram, Discord, Slack answered around the clock by an
+  always-on `hermes gateway`.
+- **Always-latest upstream** — builds from `nousresearch/hermes-agent@main` (pinnable).
+- **Nothing bundled** — no credentials ship; bring your own keys.
+
+## After you deploy
+
+Give the agent an LLM — either set an API-key variable (`OPENAI_API_KEY`,
+`OPENROUTER_API_KEY`, …) or authenticate a ChatGPT / Codex subscription over SSH:
+
+```bash
+railway ssh -s <service> -- hermes auth add openai-codex --type oauth --no-browser
+```
+
+Then **slim**: set a messaging token (`TELEGRAM_BOT_TOKEN`, …) to bring a channel
+online — the gateway is already running. **Full**: open the generated domain, log in,
+and configure providers/channels in the browser. For a persistent shell, use
+`railway ssh -s <service> --session` (Railway provisions tmux on demand).
+
+## Build it yourself (instead of the button)
+
+Both variants live in this repo; each builds from its own subdirectory
+(`variants/slim`, `variants/full`) with the service **Root Directory** set
+accordingly and a volume attached. See the full phased recipe in
+**[docs/hermes-railway-bringup.md](docs/hermes-railway-bringup.md)**.
 
 ## Layout
 
 ```
 hermes-agent/
 ├── variants/
-│   ├── slim/     Dockerfile + railway.json   — python-slim, CLI+gateway, vol /data
-│   └── full/     Dockerfile + railway.json   — dashboard built from source, vol /opt/data
-├── scripts/      (run from the linked project dir, e.g. variants/slim)
-│   ├── onboard-codex.sh    drive Codex device-flow auth (hermes auth add) + set model
+│   ├── slim/   Dockerfile + entrypoint + TEMPLATE.md   — python-slim, CLI+gateway, vol /data
+│   └── full/   Dockerfile + entrypoint + TEMPLATE.md   — dashboard from source, vol /opt/data
+├── assets/     icon.png · onboarding.png · dashboard.png   (marketplace artwork)
+├── scripts/
+│   ├── onboard-codex.sh    Codex device-flow auth (hermes auth add) + set model
 │   ├── backup-pull.sh      export a profile + pull it down (+ git/R2 sink)
 │   └── restore-profile.sh  fetch a profile tarball by URL + import it
 └── docs/
-    └── hermes-railway-bringup.md   ← full step-by-step recipe
+    ├── hermes-railway-bringup.md   ← full step-by-step recipe
+    └── hermes-deep-dive.md         ← how Hermes works (sessions, personas, safety)
 ```
 
-## Quickstart (slim)
+The agent **profile** (prompt, skills, harness/loop config, memories, cron) is a
+portable identity you can back up and restore on any device via
+`hermes profile export/import` + the Railway volume + an off-box sink (git / R2 /
+ssh-stream) — see `scripts/`.
 
-```bash
-cd hermes-agent/variants/slim
-railway init --name "hermes" && railway add --service hermes
-railway volume add -m /data          # attaches to the linked service (no -s flag)
-railway up -s hermes -d
+## Credits
 
-# auth (Codex / ChatGPT subscription) — device flow, no port-forward needed:
-SERVICE=hermes ../../scripts/onboard-codex.sh    # device flow: open the printed
-                                                 # URL, enter the code, approve
+Hermes Agent is open source by **Nous Research**
+([repo](https://github.com/nousresearch/hermes-agent), MIT). The "Nous Girl" icon is
+from that repo. This is a **community** template, not an official Nous product.
 
-# use it
-railway ssh -s hermes -- hermes -z 'reply: CODEX_OK'
-railway ssh -s hermes                 # then: tmux attach -t hermes ; hermes chat
-```
-
-Add an always-on Telegram bot:
-
-```bash
-railway variable set 'TELEGRAM_BOT_TOKEN=...' -s hermes
-railway redeploy -s hermes -y
-```
-
-Back up / restore the agent:
-
-```bash
-SERVICE=hermes PROFILE=default SINK=git GIT_DIR=~/hermes-backups ../../scripts/backup-pull.sh
-SERVICE=hermes NAME=default ARCHIVE_URL="https://…/default-XXXX.tar.gz" ../../scripts/restore-profile.sh
-```
-
-See **[docs/hermes-railway-bringup.md](docs/hermes-railway-bringup.md)** for the
-full phased recipe, the full/UI variant, and gotchas.
-
-For how Hermes works under the hood — conversation sessions & lifecycle, personas
-vs profiles vs gateways (single- and multi-persona), and capabilities & safety
-(granting credentialed tools, approvals/tirith/yolo, unattended-agent best
-practices) — see the operator deep-dive:
-**[docs/hermes-deep-dive.md](docs/hermes-deep-dive.md)**.
-
-## Variant cheat-sheet
-
-| | slim | full |
-|---|---|---|
-| Base | `python:3.12-slim` + pip `git@main` | from source: `node:22` builds UI → `python:3.12-slim` runs it |
-| `HERMES_HOME` / volume | `/data` | `/opt/data` |
-| UI | none (CLI/`hermes chat`) | first-party `hermes dashboard` on `$PORT` |
-| RAM | smallest (~200-400 MB) | heavier (Node + Playwright) |
-| Keep-alive | `hermes gateway run` (entrypoint) | entrypoint runs `hermes dashboard` + gateway |
-| Dashboard auth | n/a | basic-auth env vars or `hermes dashboard register` (required on public bind) |
-
-> CLI flags verified against hermes-agent v0.16.0 (`-z/--oneshot`,
-> `gateway run`, `login --provider openai-codex --no-browser`,
-> `profile export/import`, `config set model`, `dashboard --host/--port`).
-> Pick the concrete Codex model id via the interactive `hermes model` picker.
+> CLI verified against hermes-agent **v0.16.0**. Containers are tmux-free; slim runs
+> `hermes gateway run` as PID 1, full runs the dashboard + gateway.
