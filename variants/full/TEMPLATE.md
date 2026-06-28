@@ -41,12 +41,13 @@ headless browser** bundled — lean for what it offers.
 
 ## Dependencies for Hermes Agent (Full) Hosting
 
-On deploy you set your **dashboard login** — `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`,
-`HERMES_DASHBOARD_BASIC_AUTH_PASSWORD`, and `HERMES_DASHBOARD_BASIC_AUTH_SECRET`
-(your own values; the dashboard refuses to start unauthenticated on a public domain).
-Then give it an **LLM**: set an API-key variable (`OPENAI_API_KEY`,
-`OPENROUTER_API_KEY`, …) or sign in with a ChatGPT / Codex subscription — or just
-configure a provider from the dashboard after it boots.
+On deploy you choose your **dashboard login** — just a
+`HERMES_DASHBOARD_BASIC_AUTH_USERNAME` and `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD`.
+The session-signing secret is **generated for you on first boot** and persisted to
+the volume, so there's no opaque value to fill in. Then give it an **LLM**: set an
+API-key variable (`OPENAI_API_KEY`, `OPENROUTER_API_KEY`, …) or sign in with a
+ChatGPT / Codex subscription — or just configure a provider from the dashboard
+after it boots.
 
 ### Deployment Dependencies
 
