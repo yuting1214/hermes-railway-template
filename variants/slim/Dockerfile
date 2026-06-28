@@ -5,13 +5,15 @@
 # via `hermes gateway run`. Data lives on a Railway volume at /data (HERMES_HOME).
 #
 # Build args:
-#   HERMES_REF     git ref to install (default: main → always-latest upstream).
-#                  Pin to a tag/sha (e.g. v0.16.0) for reproducible builds.
+#   HERMES_REF     git ref to install. Defaults to a pinned CalVer release tag
+#                  (see ARG below) for reproducible builds — upstream tags are
+#                  date-versioned (e.g. v2026.6.19), NOT the v0.x package version.
+#                  Override with another tag/sha, or `main` for always-latest.
 #   HERMES_EXTRAS  pip extras (default: messaging → Telegram/Discord/Slack adapters
 #                  eager-installed so the always-on bot never needs a runtime pip).
 FROM python:3.12-slim AS base
 
-ARG HERMES_REF=main
+ARG HERMES_REF=v2026.6.19
 ARG HERMES_EXTRAS=messaging
 
 ENV PYTHONUNBUFFERED=1 \

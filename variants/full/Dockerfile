@@ -12,7 +12,7 @@
 # Data lives on a Railway volume at /opt/data (HERMES_HOME). Attach it with
 # `railway volume add -m /opt/data` (no Docker VOLUME instruction — Railway
 # rejects it).
-ARG HERMES_REF=main
+ARG HERMES_REF=v2026.6.19
 
 # ---- Stage 1: build the dashboard frontend ----
 FROM node:22-bookworm-slim AS web
