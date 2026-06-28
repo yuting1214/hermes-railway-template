@@ -1,57 +1,54 @@
-# Hermes Agent (Full) — Self-Improving AI Agent with Official Dashboard
+# Deploy and Host Hermes Agent (Full) on Railway
 
-Deploy and host a **self-improving [Hermes](https://github.com/nousresearch/hermes-agent)
-agent by Nous Research** — an autonomous agent that connects to your messaging
-channels, learns from every interaction, creates its own skills, and gets more
-capable over time.
+[Hermes](https://github.com/nousresearch/hermes-agent) is a self-improving AI agent
+by **Nous Research** that connects to your messaging channels, learns from every
+interaction, creates its own skills, and gets more capable over time. This **Full**
+template runs the agent **plus the first-party Nous `hermes dashboard`** — built from
+source — so you can configure and monitor everything from your browser.
 
-This is the **full** variant: everything in slim **plus the first-party Nous
-`hermes dashboard`**, built from source — for point-and-click configuration and
-monitoring.
+![Hermes Agent — the official Nous web dashboard](https://raw.githubusercontent.com/yuting1214/hermes-railway-template/30a9321/assets/dashboard.png)
 
-## What you get
+## About Hosting Hermes Agent (Full)
 
-- **Official web dashboard** (not a third-party UI) — configure LLM providers,
-  channels, and tools; watch live gateway logs; start/stop the agent — all in the
-  browser, behind basic auth.
-- **24/7 messaging** — Telegram, Discord, Slack and more, answered around the clock.
+The Full variant serves the **official Hermes web dashboard** behind basic auth (not a
+third-party UI): configure LLM providers, channels, and tools; watch live gateway
+logs; and start/stop the agent — all point-and-click. Alongside it runs the same
+always-on `hermes gateway` that answers Telegram, Discord, and Slack 24/7. Config,
+skills, memories, and sessions persist on a Railway **volume** (`/opt/data`) so they
+survive redeploys. Steady memory is **~300 MB** (dashboard + gateway) with **no
+headless browser** bundled — lean for what it offers.
+
+## Why Deploy Hermes Agent (Full) on Railway?
+
+- **Official dashboard, from source** — the genuine Nous `hermes dashboard`, not a
+  community wrapper.
+- **Point-and-click setup** — pick providers/channels/tools and watch logs in the
+  browser; no terminal required.
 - **Self-improving** — agent-curated memory, autonomous skill creation, cron jobs.
-- **Persistent identity** — config, skills, memories, sessions on a Railway
-  **volume** (`/opt/data`), surviving redeploys.
+- **Lean for a UI build** — ~300 MB steady, no Chromium/Playwright.
+- **Your keys, your data** — nothing is bundled and no credentials ship with the
+  template.
 
-Steady RAM ≈ **~300 MB** (dashboard + gateway) — on par with the leaner Hermes
-templates, but shipping the *official* dashboard and **no headless browser**.
-Low-memory tuning (`MALLOC_ARENA_MAX=2`) is baked into the image.
+> Want the **lowest possible RAM** and don't need a web UI? Deploy the
+> **[Slim variant](https://railway.com/deploy/hermes-agent-slim-cheapest-self-improvin)**
+> (~112 MB, CLI + gateway) — also on this marketplace.
 
-> Want the **lowest possible RAM / lowest Railway bill** and don't need a web UI?
-> Deploy the **Slim** variant (~112 MB, CLI + gateway). (link added at publish)
+## Common Use Cases
 
-## Setup
+- A **browser-managed personal assistant** you configure without touching a terminal.
+- A **team agent** where non-CLI users tweak providers/channels via the dashboard.
+- A **self-improving bot** with live observability of its gateway and logs.
 
-1. **Deploy** — a volume is attached at `/opt/data` automatically.
-2. **Set dashboard credentials** (required — the dashboard refuses to start
-   unauthenticated on a public domain):
-   - `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`
-   - `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD`
-   - `HERMES_DASHBOARD_BASIC_AUTH_SECRET`
-3. **Open the generated domain**, log in, and configure your LLM provider + channels
-   from the dashboard. (Or give it an LLM via `OPENAI_API_KEY` / Codex device-flow,
-   same as slim.)
+## Dependencies for Hermes Agent (Full) Hosting
 
-## Variables
+On deploy you set your **dashboard login** — `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`,
+`HERMES_DASHBOARD_BASIC_AUTH_PASSWORD`, and `HERMES_DASHBOARD_BASIC_AUTH_SECRET`
+(your own values; the dashboard refuses to start unauthenticated on a public domain).
+Then give it an **LLM**: set an API-key variable (`OPENAI_API_KEY`,
+`OPENROUTER_API_KEY`, …) or sign in with a ChatGPT / Codex subscription — or just
+configure a provider from the dashboard after it boots.
 
-| Variable | Required | Purpose |
-|---|---|---|
-| `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` | **yes** | dashboard login user |
-| `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD` | **yes** | dashboard login password (set your own) |
-| `HERMES_DASHBOARD_BASIC_AUTH_SECRET` | **yes** | session-signing secret (set your own) |
-| `OPENAI_API_KEY` / `OPENROUTER_API_KEY` / … | optional* | LLM provider key (*or Codex device-flow / configure in dashboard) |
-| `TELEGRAM_BOT_TOKEN` / `DISCORD_BOT_TOKEN` / … | optional | always-on messaging channel |
+### Deployment Dependencies
 
-No credentials ship with this template — you set your own on deploy.
-
----
-
-Hermes Agent is open source by **Nous Research**. This template builds the dashboard
-from upstream source (`@main`, pinnable) — the official `hermes dashboard`, no
-third-party UI.
+- [Hermes Agent](https://github.com/nousresearch/hermes-agent) — open source by Nous
+  Research; the dashboard is built from upstream source.
