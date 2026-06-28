@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 #
 # Hermes-Agent — SLIM variant (CLI + messaging gateway only, no Node/Playwright).
-# Smallest RAM/image; driven over `railway ssh` + tmux, answers messaging 24/7
+# Smallest RAM/image; driven over `railway ssh`, answers messaging 24/7
 # via `hermes gateway run`. Data lives on a Railway volume at /data (HERMES_HOME).
 #
 # Build args:
@@ -21,14 +21,14 @@ ENV PYTHONUNBUFFERED=1 \
     MALLOC_ARENA_MAX=2 \
     PATH="/opt/venv/bin:$PATH"
 
-# Runtime deps only: ripgrep (Hermes file-search tool), git, tmux (session
-# persistence for `railway ssh`), ca-certificates/curl (TLS), procps (ps — used
-# by gateway status). build tools are added then removed in one layer so any
-# source-only wheels resolve without bloating the final image.
+# Runtime deps only: ripgrep (Hermes file-search tool), git, ca-certificates/curl
+# (TLS), procps (ps — used by gateway status). build tools are added then removed
+# in one layer so any source-only wheels resolve without bloating the final image.
+# (No tmux: `railway ssh --session` provisions it on demand when you want one.)
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-        ca-certificates curl git ripgrep tmux procps build-essential; \
+        ca-certificates curl git ripgrep procps build-essential; \
     python -m venv /opt/venv; \
     /opt/venv/bin/pip install --upgrade pip; \
     /opt/venv/bin/pip install \

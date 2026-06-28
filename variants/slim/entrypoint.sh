@@ -24,33 +24,11 @@ for k in OPENAI_API_KEY OPENROUTER_API_KEY ANTHROPIC_API_KEY NOUS_API_KEY \
   eval "v=\${$k:-}"; put_env "$k" "${v:-}"
 done
 
-# Detached tmux session for: railway ssh -s hermes -- tmux attach -t hermes
-# Independent of the gateway below — detaching never stops the responder.
-tmux new-session -d -s hermes 2>/dev/null || true
-
-# Keep-alive == the always-on response engine.
-#   HERMES_KEEPALIVE=gateway  → always run the messaging gateway
-#   HERMES_KEEPALIVE=idle     → just stay up for railway ssh (manual hermes chat)
-#   HERMES_KEEPALIVE=auto     → gateway iff a messaging platform is CONFIGURED
-#       (default). A token counts whether it's a Railway env var OR was written to
-#       $HERMES_HOME/.env by `hermes gateway setup` — so a configured agent always
-#       auto-starts its SUPERVISED (PID-1) gateway, surviving redeploys/crashes.
-mode="${HERMES_KEEPALIVE:-auto}"
-if [ "$mode" = "auto" ]; then
-  if [ -n "${TELEGRAM_BOT_TOKEN:-}${DISCORD_BOT_TOKEN:-}${SLACK_BOT_TOKEN:-}" ] \
-     || { [ -f "$ENV_FILE" ] && grep -qE '^(TELEGRAM_BOT_TOKEN|DISCORD_BOT_TOKEN|SLACK_BOT_TOKEN)=.' "$ENV_FILE"; }; then
-    mode="gateway"
-  else
-    mode="idle"
-  fi
-fi
-case "$mode" in
-  gateway)
-    echo "[hermes] starting gateway (response engine) — HERMES_HOME=$HERMES_HOME"
-    exec hermes gateway run -v
-    ;;
-  *)
-    echo "[hermes] no messaging platform set; idling for railway ssh. HERMES_HOME=$HERMES_HOME"
-    exec tail -f /dev/null
-    ;;
-esac
+# Always-on response engine as PID 1 (Railway supervises it; restarts on crash).
+# `hermes gateway run` stays up even with NO messaging platform configured — it
+# keeps running cron + housekeeping — so a freshly-deployed agent is reachable
+# over `railway ssh` for onboarding (`hermes auth add …`, `hermes chat`) with no
+# keep-alive shim. Want a persistent shell? `railway ssh --session` (Railway
+# provisions tmux on demand).
+echo "[hermes] starting gateway (response engine) — HERMES_HOME=$HERMES_HOME"
+exec hermes gateway run -v

@@ -31,9 +31,6 @@ for k in OPENAI_API_KEY OPENROUTER_API_KEY ANTHROPIC_API_KEY NOUS_API_KEY \
   eval "v=\${$k:-}"; put_env "$k" "${v:-}"
 done
 
-# tmux session for: railway ssh -s hermes-full -- tmux attach -t hermes
-tmux new-session -d -s hermes 2>/dev/null || true
-
 PORT="${PORT:-8080}"
 echo "[hermes-full] dashboard on 0.0.0.0:${PORT} + gateway — HERMES_HOME=${HERMES_HOME}"
 

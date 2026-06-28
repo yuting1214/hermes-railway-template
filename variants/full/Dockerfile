@@ -42,7 +42,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      ca-certificates curl git ripgrep tmux procps build-essential \
+      ca-certificates curl git ripgrep procps build-essential \
  && python -m venv /opt/venv \
  && /opt/venv/bin/pip install --upgrade pip
 
