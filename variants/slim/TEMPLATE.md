@@ -54,5 +54,5 @@ bring a channel online.
   Research; built from upstream source.
 
 > Prefer a point-and-click web dashboard? Deploy the
-> **[Full variant](https://railway.com/deploy/hermes-agent-full-self-improving-ai-agen)**
+> **[Full variant](https://railway.com/deploy/hermes-agent-full-self-improving-ai-agen?referralCode=jk_FgY&utm_medium=integration&utm_source=template&utm_campaign=generic)**
 > — the first-party Nous dashboard, built from source — also on this marketplace.

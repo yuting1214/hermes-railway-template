@@ -30,7 +30,7 @@ headless browser** bundled — lean for what it offers.
   template.
 
 > Want the **lowest possible RAM** and don't need a web UI? Deploy the
-> **[Slim variant](https://railway.com/deploy/hermes-agent-slim-cheapest-self-improvin)**
+> **[Slim variant](https://railway.com/deploy/hermes-agent-slim-cheapest-self-improvin?referralCode=jk_FgY&utm_medium=integration&utm_source=template&utm_campaign=generic)**
 > (~112 MB, CLI + gateway) — also on this marketplace.
 
 ## Common Use Cases
