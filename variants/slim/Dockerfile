@@ -9,15 +9,17 @@
 #                  (see ARG below) for reproducible builds — upstream tags are
 #                  date-versioned (e.g. v2026.6.19), NOT the v0.x package version.
 #                  Override with another tag/sha, or `main` for always-latest.
-#   HERMES_EXTRAS  pip extras (default: messaging → Telegram/Discord/Slack adapters
-#                  eager-installed so the always-on bot never needs a runtime pip).
-FROM python:3.12-slim AS base
+#   HERMES_EXTRAS  uv/pip extras (default: messaging → Telegram/Discord/Slack
+#                  adapters eager-installed so the bot needs no runtime install).
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS base
 
 ARG HERMES_REF=v2026.6.19
 ARG HERMES_EXTRAS=messaging
 
 ENV PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
+    UV_PYTHON_DOWNLOADS=0 \
+    UV_NO_CACHE=1 \
+    VIRTUAL_ENV=/opt/venv \
     HERMES_HOME=/data \
     HOME=/data \
     MALLOC_ARENA_MAX=2 \
@@ -27,13 +29,13 @@ ENV PYTHONUNBUFFERED=1 \
 # (TLS), procps (ps — used by gateway status). build tools are added then removed
 # in one layer so any source-only wheels resolve without bloating the final image.
 # (No tmux: `railway ssh --session` provisions it on demand when you want one.)
+# `uv` ships in the base image — far faster installs/resolve than pip.
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         ca-certificates curl git ripgrep procps build-essential; \
-    python -m venv /opt/venv; \
-    /opt/venv/bin/pip install --upgrade pip; \
-    /opt/venv/bin/pip install \
+    uv venv /opt/venv; \
+    uv pip install \
         "hermes-agent[${HERMES_EXTRAS}] @ git+https://github.com/nousresearch/hermes-agent.git@${HERMES_REF}"; \
     apt-get purge -y --auto-remove build-essential; \
     rm -rf /var/lib/apt/lists/*

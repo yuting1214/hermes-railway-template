@@ -30,10 +30,13 @@ RUN rm -rf apps \
  && rm -rf node_modules web/node_modules ui-tui/node_modules .git
 
 # ---- Stage 2: python runtime (dashboard + gateway) ----
-FROM python:3.12-slim
+# uv base image — `uv` ships in it, far faster installs/resolve than pip.
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 ARG HERMES_REF
 ENV PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
+    UV_PYTHON_DOWNLOADS=0 \
+    UV_NO_CACHE=1 \
+    VIRTUAL_ENV=/opt/venv \
     HERMES_HOME=/opt/data \
     HOME=/opt/data \
     HERMES_WEB_DIST=/opt/hermes/hermes_cli/web_dist \
@@ -43,13 +46,12 @@ ENV PYTHONUNBUFFERED=1 \
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       ca-certificates curl git ripgrep procps build-essential \
- && python -m venv /opt/venv \
- && /opt/venv/bin/pip install --upgrade pip
+ && uv venv /opt/venv
 
 # Source tree (incl. the prebuilt web_dist) from the Node stage.
 COPY --from=web /src /opt/hermes
 WORKDIR /opt/hermes
-RUN /opt/venv/bin/pip install -e ".[web,messaging]" \
+RUN uv pip install -e ".[web,messaging]" \
  && apt-get purge -y --auto-remove build-essential \
  && rm -rf /var/lib/apt/lists/*
 
