@@ -1,21 +1,20 @@
 # Deploy and Host Hermes Agent (Slim) on Railway
 
 [Hermes](https://github.com/nousresearch/hermes-agent) is a self-improving AI agent
-by **Nous Research** — it connects to your messaging channels, learns from every
+by **Nous Research** that connects to your messaging channels, learns from every
 interaction, creates its own skills, and gets more capable over time. This **Slim**
-template runs it **headless** (CLI + always-on messaging gateway, no web UI) for the
-**smallest possible footprint — ~112 MB RAM**.
+template runs it **headless** — CLI plus an always-on messaging gateway, no web UI —
+for the smallest possible footprint (**~112 MB RAM**).
 
 ## About Hosting Hermes Agent (Slim)
 
-Hosting the Slim variant means running an always-on `hermes gateway` that answers
-Telegram, Discord, and Slack around the clock, while persisting skills, memories,
-sessions, and auth on a Railway **volume** (`/data`) so they survive redeploys. It
-ships **no dashboard, no Node, and no headless browser** — just the agent and its
-messaging gateway, with glibc tuned (`MALLOC_ARENA_MAX=2`) so the always-on engine
-idles around **~112 MB**. Because Railway bills by **GB-hour of memory**, a leaner
-agent means a **lower monthly bill** for the same 24/7 self-improving agent. You can
-drive it from your terminal over `railway ssh` + `tmux` and `hermes chat`.
+The Slim variant keeps an always-on `hermes gateway` answering Telegram, Discord, and
+Slack around the clock, while persisting skills, memories, and sessions automatically
+so they survive redeploys. It ships **no dashboard, no Node, and no headless browser**
+— just the agent and its gateway, tuned to idle around **~112 MB**. Because Railway
+bills by **GB-hour of memory**, a leaner agent means a **lower monthly bill** for the
+same self-improving agent. Storage, persistence, and low-memory tuning are handled for
+you — you only bring an LLM key.
 
 ## Why Deploy Hermes Agent (Slim) on Railway?
 
@@ -31,8 +30,7 @@ possible:
 - **Lowest RAM, lowest bill** — the leanest way to keep a Hermes agent online 24/7.
 - **Self-improving** — agent-curated memory, autonomous skill creation, cron jobs.
 - **Multi-channel** — Telegram, Discord, Slack, and more.
-- **Your keys, your data** — bring an API key or a ChatGPT/Codex subscription; nothing
-  is bundled and no credentials ship with the template.
+- **Your keys, your data** — nothing is bundled and no credentials ship with the template.
 
 ## Common Use Cases
 
@@ -43,36 +41,15 @@ possible:
 
 ## Dependencies for Hermes Agent (Slim) Hosting
 
-- An **LLM provider** — set an API-key variable (`OPENAI_API_KEY`,
-  `OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY`, …), **or** authenticate a ChatGPT/Codex
-  subscription over `railway ssh`:
-  ```bash
-  railway ssh -s hermes -- hermes auth add openai-codex --type oauth --no-browser
-  ```
-- (optional) a **messaging bot token** — `TELEGRAM_BOT_TOKEN`, `DISCORD_BOT_TOKEN`,
-  or `SLACK_BOT_TOKEN` — to bring an always-on channel online.
+All you provide is an **LLM**: set an API-key variable (`OPENAI_API_KEY`,
+`OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY`, …) on deploy, or sign in with a ChatGPT /
+Codex subscription afterward. Optionally add a Telegram, Discord, or Slack bot token to
+bring a channel online.
 
 ### Deployment Dependencies
 
-- [Hermes Agent (upstream source)](https://github.com/nousresearch/hermes-agent) —
-  built from `@main`, pinnable.
-- A Railway **volume** mounted at `/data` (attached automatically) for persistent
-  skills, memories, sessions, and auth.
+- [Hermes Agent](https://github.com/nousresearch/hermes-agent) — open source by Nous
+  Research; built from upstream source.
 
-### Variables
-
-| Variable | Required | Purpose |
-|---|---|---|
-| `OPENAI_API_KEY` / `OPENROUTER_API_KEY` / `ANTHROPIC_API_KEY` | optional* | LLM provider key (*or use the Codex device-flow above) |
-| `TELEGRAM_BOT_TOKEN` / `DISCORD_BOT_TOKEN` / `SLACK_BOT_TOKEN` | optional | enable an always-on messaging channel |
-| `HERMES_KEEPALIVE` | optional | `auto` (default), `gateway`, or `idle` |
-
-Low-memory tuning (`MALLOC_ARENA_MAX=2`) ships baked into the image — nothing to set.
-
-> Want a point-and-click web dashboard instead? A **Full** variant — the first-party
-> Nous dashboard, built from source — is also available on this marketplace.
-
----
-
-Hermes Agent is open source by **Nous Research**. This template bundles no third-party
-UI — only Hermes-team artifacts.
+> Prefer a point-and-click web dashboard? A **Full** variant — the first-party Nous
+> dashboard, built from source — is also available on this marketplace.
