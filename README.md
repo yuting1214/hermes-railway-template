@@ -23,7 +23,13 @@ third-party UI.
 - **Self-improving** — agent-curated memory, autonomous skill creation, cron jobs.
 - **24/7 messaging** — Telegram, Discord, Slack answered around the clock by an
   always-on `hermes gateway`.
-- **Always-latest upstream** — builds from `nousresearch/hermes-agent@main` (pinnable).
+- **Pinned to a real upstream release** — currently
+  **[`v2026.7.30`](https://github.com/NousResearch/hermes-agent/releases/tag/v2026.7.30)
+  (hermes-agent v0.19.1)**, not a moving `main`, so a deploy today and a deploy next
+  month give you the same agent. Override with `--build-arg HERMES_REF=…`.
+  What each upstream release changed is digested in
+  **[docs/upstream-changelog.md](docs/upstream-changelog.md)** — no need to go read
+  the release notes yourself.
 - **Nothing bundled** — no credentials ship; bring your own keys.
 
 ## After you deploy
@@ -61,7 +67,8 @@ hermes-agent/
 │   └── restore-profile.sh  fetch a profile tarball by URL + import it
 └── docs/
     ├── hermes-railway-bringup.md   ← full step-by-step recipe
-    └── hermes-deep-dive.md         ← how Hermes works (sessions, personas, safety)
+    ├── hermes-deep-dive.md         ← how Hermes works (sessions, personas, safety)
+    └── upstream-changelog.md       ← which upstream release we pin + what it changed
 ```
 
 The agent **profile** (prompt, skills, harness/loop config, memories, cron) is a
@@ -75,5 +82,7 @@ Hermes Agent is open source by **Nous Research**
 ([repo](https://github.com/nousresearch/hermes-agent), MIT). The "Nous Girl" icon is
 from that repo. This is a **community** template, not an official Nous product.
 
-> CLI verified against hermes-agent **v0.16.0**. Containers are tmux-free; slim runs
-> `hermes gateway run` as PID 1, full runs the dashboard + gateway.
+> Tracking hermes-agent **v0.19.1** (upstream tag `v2026.7.30`). Containers are
+> tmux-free; slim runs `hermes gateway run` as PID 1, full runs the dashboard +
+> gateway. Check a running service with
+> `railway ssh -s <service> -- printenv HERMES_PINNED_REF`.

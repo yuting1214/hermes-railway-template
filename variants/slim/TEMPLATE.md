@@ -32,6 +32,9 @@ possible:
 - **Lowest RAM, lowest bill** — the leanest way to keep a Hermes agent online 24/7.
 - **Self-improving** — agent-curated memory, autonomous skill creation, cron jobs.
 - **Multi-channel** — Telegram, Discord, Slack, and more.
+- **Pinned to a tested release, not a moving branch** — currently **hermes-agent
+  v0.19.1** (upstream tag `v2026.7.30`), so what you deploy is reproducible rather
+  than whatever landed on `main` this morning.
 - **Your keys, your data** — nothing is bundled and no credentials ship with the template.
 
 ## Common Use Cases
@@ -51,7 +54,9 @@ bring a channel online.
 ### Deployment Dependencies
 
 - [Hermes Agent](https://github.com/nousresearch/hermes-agent) — open source by Nous
-  Research; built from upstream source.
+  Research; built from upstream source, pinned to release
+  [`v2026.7.30`](https://github.com/NousResearch/hermes-agent/releases/tag/v2026.7.30)
+  (**v0.19.1**, July 2026).
 
 > Prefer a point-and-click web dashboard? Deploy the
 > **[Full variant](https://railway.com/deploy/hermes-agent-full-self-improving-ai-agen?referralCode=jk_FgY&utm_medium=integration&utm_source=template&utm_campaign=generic)**
