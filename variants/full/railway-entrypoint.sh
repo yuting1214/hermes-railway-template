@@ -32,6 +32,7 @@ for k in OPENAI_API_KEY OPENROUTER_API_KEY ANTHROPIC_API_KEY NOUS_API_KEY \
 done
 
 PORT="${PORT:-8080}"
+echo "[hermes-full] upstream ${HERMES_PINNED_REF:-unpinned} (hermes-agent ${HERMES_PINNED_VERSION:-?})"
 echo "[hermes-full] dashboard on 0.0.0.0:${PORT} + gateway — HERMES_HOME=${HERMES_HOME}"
 
 # Dashboard session-signing secret: auto-generated on first boot and persisted to

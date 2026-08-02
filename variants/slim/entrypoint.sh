@@ -30,5 +30,6 @@ done
 # over `railway ssh` for onboarding (`hermes auth add …`, `hermes chat`) with no
 # keep-alive shim. Want a persistent shell? `railway ssh --session` (Railway
 # provisions tmux on demand).
+echo "[hermes] upstream ${HERMES_PINNED_REF:-unpinned} (hermes-agent ${HERMES_PINNED_VERSION:-?})"
 echo "[hermes] starting gateway (response engine) — HERMES_HOME=$HERMES_HOME"
 exec hermes gateway run -v
