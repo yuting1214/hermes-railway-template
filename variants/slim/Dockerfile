@@ -128,13 +128,37 @@ ENV PYTHONUNBUFFERED=1 \
 # working the BUILD fails loudly — no broken image can reach deployers.
 #
 # This runs while the `deps` stage compiles SQLite in parallel.
+# xz-utils is NOT for this build — it is for the runtime escape hatch below. Node's
+# release tarball is `.tar.xz`, and without `xz` upstream's installer aborts with
+# "tar (child): xz: Cannot exec: No such file or directory". xz-utils + the bundled
+# install.sh measured **+6 MB** on the final image (734 -> 740 MB).
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-        ca-certificates curl git ripgrep procps build-essential; \
+        ca-certificates curl git ripgrep procps xz-utils build-essential; \
     uv venv /opt/venv; \
     HERMES_NIX_BUILD=1 uv pip install \
         "hermes-agent[${HERMES_EXTRAS}] @ git+https://github.com/nousresearch/hermes-agent.git@${HERMES_REF}"; \
+    \
+    # Restore upstream's lazy-dependency escape hatch. `hermes_cli.dep_ensure` treats
+    # node/browser/ffmpeg as installable-on-demand and shells out to the repo's
+    # scripts/install.sh — but a NON-editable install (which we choose: 87 MiB RSS vs
+    # 131 MiB editable) never ships that script, so _find_install_script() returns None
+    # and the agent dead-ends with "no install script was found" instead of offering to
+    # install. Fetch it at the SAME pinned ref so script and code always match.
+    # Nothing is installed at build time: this only runs if a tool asks for node at
+    # runtime, and it installs into $HERMES_HOME (the Railway volume, ~200 MB for Node)
+    # so it survives redeploys. A local browser is still NOT supported here — Chromium
+    # needs ~25 X/GTK/NSS libraries this image deliberately omits; use the hosted
+    # browsing extras (exa / firecrawl / parallel-web) instead. See TEMPLATE.md.
+    site="$(/opt/venv/bin/python -c 'import hermes_cli, os; print(os.path.dirname(hermes_cli.__file__))')"; \
+    mkdir -p "${site}/scripts"; \
+    curl -fsSL --retry 3 --retry-all-errors --connect-timeout 15 --max-time 120 \
+        -o "${site}/scripts/install.sh" \
+        "https://raw.githubusercontent.com/NousResearch/hermes-agent/${HERMES_REF}/scripts/install.sh"; \
+    chmod +x "${site}/scripts/install.sh"; \
+    /opt/venv/bin/python -c "from hermes_cli.dep_ensure import _find_install_script; p, s = _find_install_script(); assert p is not None, 'lazy-dep escape hatch still broken'; print(f'lazy-dep installer: {p} ({s})')"; \
+    \
     apt-get purge -y --auto-remove build-essential; \
     rm -rf /var/lib/apt/lists/*
 

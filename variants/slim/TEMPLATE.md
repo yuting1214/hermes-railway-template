@@ -37,6 +37,29 @@ possible:
   than whatever landed on `main` this morning.
 - **Your keys, your data** — nothing is bundled and no credentials ship with the template.
 
+## What Slim Leaves Out (and How to Get It Back)
+
+Slim ships no Node, no ffmpeg, and no headless browser — that is where the RAM and
+image savings come from. Upstream treats these as optional, install-on-demand
+dependencies, so nothing is permanently lost:
+
+| Feature | In Slim | How to get it |
+|---|---|---|
+| Telegram / Discord / Slack gateway, skills, memory, cron | ✅ included | — |
+| File search (ripgrep) | ✅ included | — |
+| `npx`-based MCP servers, terminal UI | ⚙️ on demand | Hermes installs Node 22 into your volume on first use (**~200 MB of volume**) |
+| TTS voice-message conversion (ffmpeg) | ➖ skipped | `apt-get install ffmpeg` in a fork, or use text replies |
+| Local headless browser (Chromium) | ❌ not supported | Use hosted browsing — `exa`, `firecrawl`, `parallel-web`, or Browserbase — or deploy the Full variant and add a browser there |
+
+**Why no local browser:** Chromium needs ~25 X/GTK/NSS system libraries and ~184 MB
+of binary. Bundling it is what pushes other Hermes templates to 1–4 GB of RAM and
+multi-GB images — the exact cost this variant exists to avoid. API-based browsing
+tools give an agent the same capability without a browser in the container.
+
+**Note on the on-demand Node install:** it writes to the persistent volume (so it
+survives redeploys) and Railway bills volume storage, so it is worth knowing it can
+add ~200 MB the first time a tool needs it.
+
 ## Common Use Cases
 
 - A **24/7 personal assistant** on Telegram or Discord that remembers context and

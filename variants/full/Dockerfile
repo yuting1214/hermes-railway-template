@@ -72,10 +72,14 @@ ARG SQLITE_AUTOCONF_VERSION=3530400
 ARG SQLITE_SHA256=0e9483900e92cd5de8fd48d16bf9200145a61f7fd5be542a5ac81d8a9516eb9c
 ARG TIRITH_VERSION=v0.3.3
 ARG TARGETARCH
+# xz-utils: needed at RUNTIME, not for this build. This variant installs editable from
+# /opt/hermes, so upstream's scripts/install.sh IS present and `hermes` can lazily
+# install Node on demand — but Node ships as `.tar.xz`, and without `xz` that install
+# aborts with "tar (child): xz: Cannot exec". ~1.3 MB to keep the escape hatch usable.
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-        ca-certificates curl git ripgrep procps build-essential; \
+        ca-certificates curl git ripgrep procps xz-utils build-essential; \
     \
     curl -fsSL --retry 3 --retry-all-errors --connect-timeout 15 --max-time 120 \
         -o /tmp/sqlite.tar.gz \

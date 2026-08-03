@@ -36,6 +36,25 @@ headless browser** bundled — lean for what it offers.
 > **[Slim variant](https://railway.com/deploy/hermes-agent-slim-cheapest-self-improvin?referralCode=jk_FgY&utm_medium=integration&utm_source=template&utm_campaign=generic)**
 > (~112 MB, CLI + gateway) — also on this marketplace.
 
+## What Full Leaves Out (and How to Get It Back)
+
+Full ships the dashboard and gateway, but deliberately **not** a headless browser,
+ffmpeg, or a preinstalled Node runtime — those are what make other Hermes templates
+1–4 GB. Upstream treats them as install-on-demand:
+
+| Feature | In Full | How to get it |
+|---|---|---|
+| Official dashboard, gateway, skills, memory, cron | ✅ included | — |
+| `npx`-based MCP servers, terminal UI | ⚙️ on demand | Hermes installs Node 22 into your volume on first use (**~200 MB of volume**) |
+| TTS voice-message conversion (ffmpeg) | ➖ skipped | `apt-get install ffmpeg` in a fork, or use text replies |
+| Local headless browser (Chromium) | ❌ not supported | Use hosted browsing — `exa`, `firecrawl`, `parallel-web`, or Browserbase |
+
+Chromium needs ~25 X/GTK/NSS system libraries plus ~184 MB of binary; bundling it
+would roughly triple this image and its memory floor. API-based browsing tools give
+the agent the same capability without a browser in the container. The on-demand Node
+install writes to the persistent volume (so it survives redeploys), and Railway bills
+volume storage — worth knowing before a tool triggers it.
+
 ## Common Use Cases
 
 - A **browser-managed personal assistant** you configure without touching a terminal.
