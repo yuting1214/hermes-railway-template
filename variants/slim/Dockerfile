@@ -16,9 +16,9 @@
 # each release changed. For the republish rules (a bump must never alter the
 # marketplace slug or the referral links) use the `railway-templates` skill.
 
-# Pinned upstream release: v2026.7.30 == Hermes Agent v0.19.1 (2026-07-30).
-ARG HERMES_REF=v2026.7.30
-ARG HERMES_VERSION=0.19.1
+# Pinned upstream release: v2026.8.3 == Hermes Agent v0.20.0 (2026-08-03).
+ARG HERMES_REF=v2026.8.3
+ARG HERMES_VERSION=0.20.0
 ARG HERMES_EXTRAS=messaging
 # Patched SQLite — Hermes requires >= 3.51.3; see the `deps` stage.
 ARG SQLITE_AUTOCONF_VERSION=3530400
@@ -249,7 +249,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # Version tracking — which upstream release this image is built from. Inspect with
 #   docker inspect --format '{{index .Config.Labels "com.nousresearch.hermes.release"}}' <img>
 LABEL org.opencontainers.image.title="Hermes Agent (Slim) — Railway template" \
-      org.opencontainers.image.description="Headless Hermes agent: CLI + always-on messaging gateway, ~130 MB RSS" \
+      org.opencontainers.image.description="Headless Hermes agent: CLI + always-on messaging gateway, ~160 MB RSS" \
       org.opencontainers.image.source="https://github.com/yuting1214/hermes-railway-template" \
       org.opencontainers.image.version="${HERMES_VERSION}" \
       org.opencontainers.image.licenses="MIT" \

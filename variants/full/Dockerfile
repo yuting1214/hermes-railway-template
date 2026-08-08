@@ -17,9 +17,9 @@
 # each release changed. For the republish rules (a bump must never alter the
 # marketplace slug or the referral links) use the `railway-templates` skill.
 #
-# Pinned upstream release: v2026.7.30 == Hermes Agent v0.19.1 (2026-07-30).
-ARG HERMES_REF=v2026.7.30
-ARG HERMES_VERSION=0.19.1
+# Pinned upstream release: v2026.8.3 == Hermes Agent v0.20.0 (2026-08-03).
+ARG HERMES_REF=v2026.8.3
+ARG HERMES_VERSION=0.20.0
 
 # ---- Stage 1: build the dashboard frontend ----
 FROM node:22-bookworm-slim AS web
