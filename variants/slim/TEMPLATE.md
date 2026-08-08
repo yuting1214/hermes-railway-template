@@ -60,6 +60,29 @@ tools give an agent the same capability without a browser in the container.
 survives redeploys) and Railway bills volume storage, so it is worth knowing it can
 add ~200 MB the first time a tool needs it.
 
+## Keeping It Up To Date
+
+**Your deploy does not auto-update, by design.** The service builds from this
+template's GitHub repo, but it is not subscribed to it — a push by the template author
+can never restart or change your running agent. You upgrade when you choose to.
+
+To see what you're running:
+
+```bash
+railway ssh -s <service> -- printenv HERMES_PINNED_REF     # e.g. v2026.8.3
+```
+
+To upgrade: open the service in Railway → **Deployments** → deploy the latest commit.
+(Plain "Redeploy" re-runs the *existing* build, so it will not pick up new code.)
+
+**Your data survives an upgrade.** Everything the agent has learned lives on the
+volume at `/data` — skills, memories, sessions, cron jobs, `SOUL.md`, and its
+credentials — and the volume is never touched by a redeploy. Two things worth doing
+first: take a volume backup (Railway → service → Volume → Backup), and skim
+[the changelog](https://github.com/yuting1214/hermes-railway-template/blob/main/docs/upstream-changelog.md),
+which digests what each upstream release changed and flags default changes that
+affect an unattended agent.
+
 ## Common Use Cases
 
 - A **24/7 personal assistant** on Telegram or Discord that remembers context and

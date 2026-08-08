@@ -55,6 +55,29 @@ the agent the same capability without a browser in the container. The on-demand 
 install writes to the persistent volume (so it survives redeploys), and Railway bills
 volume storage — worth knowing before a tool triggers it.
 
+## Keeping It Up To Date
+
+**Your deploy does not auto-update, by design.** The service builds from this
+template's GitHub repo, but it is not subscribed to it — a push by the template author
+can never restart or change your running agent. You upgrade when you choose to.
+
+To see what you're running:
+
+```bash
+railway ssh -s <service> -- printenv HERMES_PINNED_REF     # e.g. v2026.8.3
+```
+
+To upgrade: open the service in Railway → **Deployments** → deploy the latest commit.
+(Plain "Redeploy" re-runs the *existing* build, so it will not pick up new code.)
+
+**Your data survives an upgrade.** Config, skills, memories, sessions and the
+dashboard's generated signing secret all live on the volume at `/opt/data`, which a
+redeploy never touches. Two things worth doing first: take a volume backup (Railway →
+service → Volume → Backup), and skim
+[the changelog](https://github.com/yuting1214/hermes-railway-template/blob/main/docs/upstream-changelog.md),
+which digests what each upstream release changed and flags default changes that affect
+an unattended agent.
+
 ## Common Use Cases
 
 - A **browser-managed personal assistant** you configure without touching a terminal.
