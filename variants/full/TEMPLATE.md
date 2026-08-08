@@ -27,14 +27,14 @@ headless browser** bundled — lean for what it offers.
 - **Self-improving** — agent-curated memory, autonomous skill creation, cron jobs.
 - **Lean for a UI build** — ~300 MB steady, no Chromium/Playwright.
 - **Pinned to a tested release, not a moving branch** — currently **hermes-agent
-  v0.19.1** (upstream tag `v2026.7.30`), so what you deploy is reproducible rather
+  v0.20.0** (upstream tag `v2026.8.3`), so what you deploy is reproducible rather
   than whatever landed on `main` this morning.
 - **Your keys, your data** — nothing is bundled and no credentials ship with the
   template.
 
 > Want the **lowest possible RAM** and don't need a web UI? Deploy the
 > **[Slim variant](https://railway.com/deploy/hermes-agent-slim-cheapest-self-improvin?referralCode=jk_FgY&utm_medium=integration&utm_source=template&utm_campaign=generic)**
-> (~130 MB, CLI + gateway) — also on this marketplace.
+> (~160 MB, CLI + gateway) — also on this marketplace.
 
 ## What Full Leaves Out (and How to Get It Back)
 
@@ -75,5 +75,5 @@ after it boots.
 
 - [Hermes Agent](https://github.com/nousresearch/hermes-agent) — open source by Nous
   Research; the dashboard is built from upstream source, pinned to release
-  [`v2026.7.30`](https://github.com/NousResearch/hermes-agent/releases/tag/v2026.7.30)
-  (**v0.19.1**, July 2026).
+  [`v2026.8.3`](https://github.com/NousResearch/hermes-agent/releases/tag/v2026.8.3)
+  (**v0.20.0**, August 2026).

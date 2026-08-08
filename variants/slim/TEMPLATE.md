@@ -4,7 +4,7 @@
 by **Nous Research** that connects to your messaging channels, learns from every
 interaction, creates its own skills, and gets more capable over time. This **Slim**
 template runs it **headless** — CLI plus an always-on messaging gateway, no web UI —
-for the smallest possible footprint (**~130 MB RAM**).
+for the smallest possible footprint (**~160 MB RAM**).
 
 ![Hermes Agent — CLI splash showing 31 tools and 76 skills](https://raw.githubusercontent.com/yuting1214/hermes-railway-template/7b6ac00/assets/onboarding.png)
 
@@ -13,7 +13,7 @@ for the smallest possible footprint (**~130 MB RAM**).
 The Slim variant keeps an always-on `hermes gateway` answering Telegram, Discord, and
 Slack around the clock, while persisting skills, memories, and sessions automatically
 so they survive redeploys. It ships **no dashboard, no Node, and no headless browser**
-— just the agent and its gateway, tuned to idle around **~130 MB**. Because Railway
+— just the agent and its gateway, tuned to idle around **~160 MB**. Because Railway
 bills by **GB-hour of memory**, a leaner agent means a **lower monthly bill** for the
 same self-improving agent. Storage, persistence, and low-memory tuning are handled for
 you — you only bring an LLM key.
@@ -25,7 +25,7 @@ possible:
 
 | | this template (slim) | typical Hermes template | browser-bundled template |
 |---|---|---|---|
-| Steady RAM | **~130 MB** | ~300–500 MB | 1–4 GB |
+| Steady RAM | **~160 MB** | ~300–500 MB | 1–4 GB |
 | Web dashboard | none (CLI) | yes | yes |
 | Node / Playwright / Chromium | none | sometimes | yes |
 
@@ -33,7 +33,7 @@ possible:
 - **Self-improving** — agent-curated memory, autonomous skill creation, cron jobs.
 - **Multi-channel** — Telegram, Discord, Slack, and more.
 - **Pinned to a tested release, not a moving branch** — currently **hermes-agent
-  v0.19.1** (upstream tag `v2026.7.30`), so what you deploy is reproducible rather
+  v0.20.0** (upstream tag `v2026.8.3`), so what you deploy is reproducible rather
   than whatever landed on `main` this morning.
 - **Your keys, your data** — nothing is bundled and no credentials ship with the template.
 
@@ -78,8 +78,8 @@ bring a channel online.
 
 - [Hermes Agent](https://github.com/nousresearch/hermes-agent) — open source by Nous
   Research; built from upstream source, pinned to release
-  [`v2026.7.30`](https://github.com/NousResearch/hermes-agent/releases/tag/v2026.7.30)
-  (**v0.19.1**, July 2026).
+  [`v2026.8.3`](https://github.com/NousResearch/hermes-agent/releases/tag/v2026.8.3)
+  (**v0.20.0**, August 2026).
 
 > Prefer a point-and-click web dashboard? Deploy the
 > **[Full variant](https://railway.com/deploy/hermes-agent-full-self-improving-ai-agen?referralCode=jk_FgY&utm_medium=integration&utm_source=template&utm_campaign=generic)**

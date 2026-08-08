@@ -1,6 +1,6 @@
 # Upstream changelog — what we pin, and what changed
 
-**Currently pinned: [`v2026.7.30`](https://github.com/NousResearch/hermes-agent/releases/tag/v2026.7.30) — Hermes Agent `v0.19.1` (July 30, 2026).**
+**Currently pinned: [`v2026.8.3`](https://github.com/NousResearch/hermes-agent/releases/tag/v2026.8.3) — Hermes Agent `v0.20.0` (August 3, 2026).**
 
 Both variants build from an upstream **release tag**, never `main`, so a template
 deploy today and a template deploy next month produce the same agent. Bumping that
@@ -25,8 +25,89 @@ version (`v0.19.1`) is a different number that appears in the release *title*.
 
 | Pinned tag | Package | Date | Status |
 |---|---|---|---|
-| `v2026.7.30` | v0.19.1 | 2026-07-30 | **current** |
-| `v2026.6.19` | v0.17.0 | 2026-06-19 | previous |
+| `v2026.8.3` | v0.20.0 | 2026-08-03 | **current** |
+| `v2026.7.30` | v0.19.1 | 2026-07-30 | previous |
+| `v2026.6.19` | v0.17.0 | 2026-06-19 | older |
+
+---
+
+## What we picked up: `v2026.7.30` (v0.19.1) → `v2026.8.3` (v0.20.0)
+
+### `v2026.8.3` — v0.20.0 · August 3, 2026 · *"The Herald Release"* ← **we are here**
+
+A **curated** release, and the notes explicitly roll up the whole v0.19.1 window — so
+nothing is deferred this time. ~3,650 commits · ~1,400 PRs · ~1,200 issues closed ·
+650+ contributors since v0.19.0.
+
+Upstream's headline is **voice** (streaming TTS with barge-in, on-device wake words)
+and the **desktop app becoming a platform**. Neither reaches this template — see
+"skipped" below. What we actually gain is quieter and mostly runtime quality.
+
+#### Matters for this template
+
+- **Compression overhaul — the biggest win for a 24/7 gateway.** Per-turn
+  micro-compaction replaces one long stall, a guaranteed N-user-message tail
+  (`compression.min_tail_user_messages`) keeps recent conversation alive, absolute
+  token thresholds (`compression.threshold_tokens`) and per-model overrides, plus
+  "ghost-skill defense" so a pruned skill can't silently haunt a session. Sessions on
+  an always-on gateway never end, so this is the failure mode we actually hit.
+- **Gateway hardening** — session activity heartbeats, a stall watchdog, and bounded
+  compression waits. Targets exactly the "agent silently wedged overnight" class.
+- **Faster, lighter start** — the ~14s GIL stall during backend init is mitigated,
+  heavy SDKs are lazily imported (−8–10% import cost), one raw `config.yaml` parse per
+  process, readonly config loader (28× cheaper reads), and turn flush batched into a
+  single SQLite transaction.
+- **Tool self-recovery wave** — terminal output spills to a file instead of vanishing,
+  `patch` diagnoses whitespace/ambiguous matches, searches probe for near-misses,
+  `write_file` verifies on disk. Fewer wasted turns, which is real money.
+- **Outbound signed webhooks** — HMAC-signed lifecycle events pushed to any endpoint.
+  The first integration path for a headless agent that isn't a chat platform.
+- **A2A v1.0** ships as a bundled platform plugin, and **Buzz** (Block's Nostr
+  messenger) as a bundled gateway platform. Both arrive as plugin manifests — 96 now,
+  up from 95 — and our `assets` stage picks them up automatically because it is
+  parameterized on `HERMES_REF`.
+- **Messaging fixes** — Slack native Block Kit clarify buttons, Discord auto-thread
+  session keying and reply references without `fetch_message`, WhatsApp configurable
+  inbound read receipts.
+- **Prompt caching** — tool schemas cached on native Anthropic without history loss;
+  Bedrock Converse `cachePoint`.
+- **Model catalogs** — Gemini 3.1 Pro / 3.6 Flash, `claude-opus-5` via OpenRouter and
+  Nous Portal, `deepseek-v4-flash-0731`.
+
+#### Default changes that affect an unattended container
+
+- **Tool-calling iteration limit 90 → 500.** Long autonomous runs stop hitting an
+  artificial wall — but an unattended agent can now spend a great deal more per turn.
+  Existing volumes are unaffected: they carry `agent.max_turns` in `config.yaml`
+  (ours is 150). Only fresh deploys get 500.
+- **`read_file` default limit 500 → 2000 lines** — larger reads, more context spent.
+- **Runaway-loop caps** added for `web_search` and `delegate_task`, and a
+  **consecutive-denial circuit breaker** for approvals. Both are guardrails, and both
+  are new behaviour on an agent nobody is watching.
+- **docker/podman daemon-redirect commands now require approval.**
+- Config migration is now a table-driven registry with an **auto-migration floor at
+  v12**. Ours are v33, so they migrate normally.
+
+#### Not relevant to this template (skipped)
+
+- The entire **desktop app** wave — artifacts with live preview, plugin SDK, quick-entry
+  hotkey, multiple windows, 60fps rendering. We ship no Electron.
+- **Voice and wake words.** Streaming TTS, barge-in, on-device wake phrases, and voice
+  notes on WhatsApp/Feishu/DingTalk/LINE/QQ/Weixin all need the `voice` extra
+  (faster-whisper + numpy + onnxruntime). Slim deliberately excludes it — adding it
+  would undo the RAM figure the template is sold on.
+- **CLI power commands** (`!shell`, `/init`, `/diff`, `/context`, `/focus`) — reachable
+  over `railway ssh`, but not what this template is for.
+- ACP model selection, desktop SSH remote backend.
+
+#### Packaging status — unchanged, still needs our workaround
+
+The `setup.py` wheel guard is **byte-identical** at this tag: a wheel still ships
+without `locales`, `skills`, `optional-mcps`, `web_dist`, `tui_dist` and **plugin
+manifests**. So `HERMES_NIX_BUILD=1` plus the `assets` stage (added 2026-08-08 in
+3c675d7, after that exact omission silently killed every messaging adapter in slim)
+remain required. The build-time assertion that telegram must register runs against
+this tag too.
 
 ---
 
@@ -42,7 +123,7 @@ app**, which we do not ship; that's called out and skipped.
 
 ---
 
-### `v2026.7.30` — v0.19.1 · July 30, 2026 · *patch rollup* ← **we are here**
+### `v2026.7.30` — v0.19.1 · July 30, 2026 · *patch rollup*
 
 An **infrastructure tag, not a curated release.** Upstream cut it explicitly "for
 downstream consumers (Docker images, hosted deployments, fresh installs)" — which is
