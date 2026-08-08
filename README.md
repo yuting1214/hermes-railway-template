@@ -10,14 +10,14 @@ third-party UI.
 |  | **Slim** — lowest RAM | **Full** — official dashboard |
 |---|---|---|
 |  | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/hermes-agent-slim-cheapest-self-improvin?referralCode=jk_FgY&utm_medium=integration&utm_source=template&utm_campaign=generic) | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/hermes-agent-full-self-improving-ai-agen?referralCode=jk_FgY&utm_medium=integration&utm_source=template&utm_campaign=generic) |
-| Steady RAM | **~112 MB** | ~300 MB |
+| Steady RAM | **~130 MB** | ~300 MB |
 | Interface | CLI + always-on gateway | + first-party `hermes dashboard` (browser) |
 | Deploy form | **nothing to fill** — one-click | username + password (signing secret auto-generated) |
 | `HERMES_HOME` / volume | `/data` | `/opt/data` |
 
 ## Why this template
 
-- **Lowest RAM, lowest bill** — slim idles **~112 MB** (no dashboard, no Node, no
+- **Lowest RAM, lowest bill** — slim idles **~130 MB** (no dashboard, no Node, no
   headless browser; glibc tuned via `MALLOC_ARENA_MAX=2`). Full ships the **official**
   Nous dashboard, **built from source**, still ~300 MB with **no Chromium**.
 - **Self-improving** — agent-curated memory, autonomous skill creation, cron jobs.
